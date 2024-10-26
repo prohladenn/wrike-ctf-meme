@@ -1,0 +1,121 @@
+<div class="loading-container">
+  <!-- The meme dog image will appear randomly along the screen edges -->
+  <img class="meme meme-dog" src="/meme.png" alt="Funny Meme Dog" />
+</div>
+
+<style>
+  .loading-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1031;
+    pointer-events: none; /* Prevent interaction */
+    overflow: hidden;
+    background-color: #121212;
+  }
+
+  .meme-dog {
+    position: absolute;
+    opacity: 0.9;
+    transition: transform 1s ease-in-out;
+    will-change: transform, top, left, right, bottom;
+  }
+</style>
+
+<script>
+  ;(function () {
+    const memeDog = document.querySelector('.meme-dog')
+
+    // Function to randomly pick an edge of the screen, rotate, and resize the dog accordingly
+    function randomPosition() {
+      const edges = ['top', 'right', 'bottom', 'left']
+      const selectedEdge = edges[Math.floor(Math.random() * edges.length)]
+
+      // Reset styles for the next appearance
+      memeDog.style.transition = 'none' // Disable transition temporarily for instant placement
+      memeDog.style.top = 'auto'
+      memeDog.style.right = 'auto'
+      memeDog.style.bottom = 'auto'
+      memeDog.style.left = 'auto'
+      memeDog.style.transform = 'none'
+
+      // Randomly size the dog between 50px and 500px
+      const randomSize = Math.random() * 400 + 100 // Random size between 50px and 500px
+      memeDog.style.width = `${randomSize}px`
+
+      // Adjust position and rotation based on selected edge
+      switch (selectedEdge) {
+        case 'top':
+          memeDog.style.top = '-100%' // Start fully hidden above the screen
+          memeDog.style.left = `${Math.random() * 80}%`
+          memeDog.style.transform = 'rotate(180deg)'
+          break
+        case 'right':
+          memeDog.style.right = '-100%' // Start fully hidden on the right
+          memeDog.style.top = `${Math.random() * 80}%`
+          memeDog.style.transform = 'rotate(-90deg)'
+          break
+        case 'bottom':
+          memeDog.style.bottom = '-100%' // Start fully hidden below the screen
+          memeDog.style.left = `${Math.random() * 80}%`
+          memeDog.style.transform = 'rotate(0deg)'
+          break
+        case 'left':
+          memeDog.style.left = '-100%' // Start fully hidden on the left
+          memeDog.style.top = `${Math.random() * 80}%`
+          memeDog.style.transform = 'rotate(90deg)'
+          break
+      }
+
+      // Trigger reflow to ensure style updates are applied immediately
+      void memeDog.offsetWidth
+
+      // Apply smooth transition for peeking out from behind the screen
+      memeDog.style.transition = 'transform 1s ease-in-out'
+
+      // Make the dog peek halfway (50% of its image visible)
+      setTimeout(() => {
+        switch (selectedEdge) {
+          case 'top':
+            memeDog.style.top = '-50%' // Move halfway into view
+            break
+          case 'right':
+            memeDog.style.right = '-50%' // Move halfway into view
+            break
+          case 'bottom':
+            memeDog.style.bottom = '-50%' // Move halfway into view
+            break
+          case 'left':
+            memeDog.style.left = '-50%' // Move halfway into view
+            break
+        }
+      }, 100)
+
+      // Hide the dog after it peeks for 1.5 seconds, moving it back to fully hidden (0%)
+      setTimeout(() => {
+        switch (selectedEdge) {
+          case 'top':
+            memeDog.style.top = '-100%' // Move it back out of view
+            break
+          case 'right':
+            memeDog.style.right = '-100%' // Move it back out of view
+            break
+          case 'bottom':
+            memeDog.style.bottom = '-100%' // Move it back out of view
+            break
+          case 'left':
+            memeDog.style.left = '-100%' // Move it back out of view
+            break
+        }
+      }, 2000)
+    }
+
+    // Randomize position every 3 seconds for more frequent appearances
+    setInterval(randomPosition, 3000)
+
+    // Start the first peeking action immediately
+    randomPosition()
+  })()
+</script>
