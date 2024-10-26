@@ -1,0 +1,1 @@
+import{az as r}from"./9k4Fgr0d.js";function p(){const{$api:e}=r();return{fetchUser:async s=>(await e.get(`/user/${s}`)).data,fetchUsers:async(s=10,t=1)=>(await e.get(`/users?limit=${s}&page=${t}`)).data}}export{p as u};
