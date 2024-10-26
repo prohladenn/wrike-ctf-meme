@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -26,11 +27,18 @@ var (
 	errCheckFileType     = errors.New("failed to check file type")
 	errInvalidFileType   = errors.New("invalid file type: only jpeg, jpg and png are allowed")
 	errTemplateInfo      = errors.New("failed to get template private info")
-	errInvalidFileName   = errors.New("invalid file name: contains ';' character")
+	errInvalidFileName   = errors.New("invalid file name: contains invalid characters")
 )
 
 type TemplateRequest struct {
 	ID string `uri:"id" binding:"required"`
+}
+
+func sanitizeFileName(fileName string) error {
+	if strings.Contains(fileName, ";") || strings.Contains(fileName, "..") || strings.Contains(fileName, "/") || strings.Contains(fileName, "\\") {
+		return fmt.Errorf("invalid file name: contains invalid characters")
+	}
+	return nil
 }
 
 func CreateTemplate(s storage.Store, memeManager *meme.MemeManager) gin.HandlerFunc {
@@ -47,7 +55,7 @@ func CreateTemplate(s storage.Store, memeManager *meme.MemeManager) gin.HandlerF
 			return
 		}
 
-		if strings.Contains(file.Filename, ";") {
+		if err := sanitizeFileName(file.Filename); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": errInvalidFileName.Error()})
 			return
 		}

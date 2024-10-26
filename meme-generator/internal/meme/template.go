@@ -23,8 +23,8 @@ const (
 )
 
 func sanitizeFileName(fileName string) error {
-	if strings.Contains(fileName, ";") {
-		return fmt.Errorf("invalid file name: contains ';' character")
+	if strings.Contains(fileName, ";") || strings.Contains(fileName, "..") || strings.Contains(fileName, "/") || strings.Contains(fileName, "\\") {
+		return fmt.Errorf("invalid file name: contains invalid characters")
 	}
 	return nil
 }
@@ -70,6 +70,14 @@ func (m *MemeManager) NewTemplate(name, comment string, fileHeader *multipart.Fi
 	}
 
 	template.FileName = filename
+
+	ok, err := CheckImageType(fileHeader)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check file type: %w", err)
+	}
+	if !ok {
+		return nil, fmt.Errorf("invalid file type: only jpeg, jpg and png are allowed")
+	}
 
 	file, err := fileHeader.Open()
 	if err != nil {
