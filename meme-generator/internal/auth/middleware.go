@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -22,4 +23,27 @@ func AuthRequired(c *gin.Context) {
 	c.Set(UserIDKey, userID)
 
 	c.Next()
+}
+
+func RegenerateSession(c *gin.Context) {
+	session := sessions.Default(c)
+	session.Clear()
+	session.Options(sessions.Options{
+		Path:     "/",
+		MaxAge:   3600, // 1 hour
+		Secure:   true,
+		HttpOnly: true,
+	})
+	session.Save()
+}
+
+func SetSessionExpiration(c *gin.Context, duration time.Duration) {
+	session := sessions.Default(c)
+	session.Options(sessions.Options{
+		Path:     "/",
+		MaxAge:   int(duration.Seconds()),
+		Secure:   true,
+		HttpOnly: true,
+	})
+	session.Save()
 }

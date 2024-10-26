@@ -25,7 +25,10 @@ var (
 	errCheckFileType     = errors.New("failed to check file type")
 	errInvalidFileType   = errors.New("invalid file type: only jpeg, jpg and png are allowed")
 	errTemplateInfo      = errors.New("failed to get template private info")
+	errFileTooLarge      = errors.New("file size exceeds the limit of 5MB")
 )
+
+const maxFileSize = 5 * 1024 * 1024 // 5MB
 
 type TemplateRequest struct {
 	ID string `uri:"id" binding:"required"`
@@ -42,6 +45,10 @@ func CreateTemplate(s storage.Store, memeManager *meme.MemeManager) gin.HandlerF
 		}
 		if file.Size == 0 {
 			c.JSON(http.StatusBadRequest, gin.H{"error": errEmptyFile.Error()})
+			return
+			}
+		if file.Size > maxFileSize {
+			c.JSON(http.StatusBadRequest, gin.H{"error": errFileTooLarge.Error()})
 			return
 		}
 

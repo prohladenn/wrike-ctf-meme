@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"regexp"
+	"time"
 
 	"meme-generator/internal/auth"
 	"meme-generator/internal/model"
@@ -14,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"golang.org/x/time/rate"
 )
 
 const (
@@ -29,6 +31,7 @@ var (
 	errHashPassword            = errors.New("failed to hash password")
 	errInvalidCredentials      = errors.New("invalid credentials")
 	errInvalidUsernameSymbols  = errors.New("invalid username symbols: only latin letters, underscores, dashes and numbers are allowed")
+	errTooManyRequests         = errors.New("too many requests, please try again later")
 )
 
 const (
@@ -41,8 +44,15 @@ type AuthRequest struct {
 	Password string `json:"password"`
 }
 
+var limiter = rate.NewLimiter(1, 5)
+
 func Register(s storage.Store) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if !limiter.Allow() {
+			c.JSON(http.StatusTooManyRequests, gin.H{"error": errTooManyRequests.Error()})
+			return
+		}
+
 		var input AuthRequest
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -88,6 +98,11 @@ func Register(s storage.Store) gin.HandlerFunc {
 
 func Login(s storage.Store) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if !limiter.Allow() {
+			c.JSON(http.StatusTooManyRequests, gin.H{"error": errTooManyRequests.Error()})
+			return
+		}
+
 		var input AuthRequest
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -119,6 +134,9 @@ func Login(s storage.Store) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": errSessionSave.Error()})
 			return
 		}
+
+		auth.RegenerateSession(c)
+		auth.SetSessionExpiration(c, time.Hour)
 
 		log.Info("User logged in", zap.Uint("user_id", user.ID), zap.String("username", user.Username))
 

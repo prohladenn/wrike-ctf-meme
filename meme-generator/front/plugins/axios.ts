@@ -1,5 +1,3 @@
-// plugins/axios.ts
-
 import { defineNuxtPlugin } from '#app'
 import axios from 'axios'
 
@@ -11,6 +9,20 @@ export default defineNuxtPlugin((nuxtApp) => {
     baseURL: apiBaseUrl,
     withCredentials: true, // For session cookie auth
   })
+
+  // Add a request interceptor to include CSRF token
+  api.interceptors.request.use(
+    (config) => {
+      const csrfToken = document.cookie.split('; ').find(row => row.startsWith('csrf_token='))
+      if (csrfToken) {
+        config.headers['X-CSRF-Token'] = csrfToken.split('=')[1]
+      }
+      return config
+    },
+    (error) => {
+      return Promise.reject(error)
+    }
+  )
 
   // Add a response interceptor
   api.interceptors.response.use(
