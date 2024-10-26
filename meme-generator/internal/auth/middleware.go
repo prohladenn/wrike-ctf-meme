@@ -19,6 +19,13 @@ func AuthRequired(c *gin.Context) {
 		return
 	}
 
+	csrfToken := c.GetHeader("X-CSRF-Token")
+	if csrfToken == "" || csrfToken != session.Get("csrf_token") {
+		c.JSON(http.StatusForbidden, gin.H{"error": "CSRF token mismatch"})
+		c.Abort()
+		return
+	}
+
 	c.Set(UserIDKey, userID)
 
 	c.Next()
