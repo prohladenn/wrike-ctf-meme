@@ -19,8 +19,9 @@ export function useTemplateApi() {
   }
 
   const createTemplate = async (input: CreateTemplateDto, file: File) => {
-    if (file.name.includes(';')) {
-      throw new Error("Invalid file name: contains ';' character")
+    const invalidCharsRegex = /[<>:"/\\|?*\x00-\x1F]/;
+    if (invalidCharsRegex.test(file.name)) {
+      throw new Error("Invalid file name: contains invalid characters")
     }
 
     const formData = new FormData()

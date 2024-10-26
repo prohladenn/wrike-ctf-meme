@@ -1,5 +1,3 @@
-// plugins/axios.ts
-
 import { defineNuxtPlugin } from '#app'
 import axios from 'axios'
 
@@ -48,7 +46,7 @@ export default defineNuxtPlugin((nuxtApp) => {
           typeof Notify !== 'undefined' &&
           typeof Notify.error === 'function'
         ) {
-          Notify.error('Network error')
+          Notify.error('Network error: Please check your internet connection.')
         } else {
           console.error('Notify.error is not available')
         }
