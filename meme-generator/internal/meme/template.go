@@ -13,8 +13,10 @@ import (
 
 	"meme-generator/internal/model"
 	"meme-generator/internal/utils"
+	"meme-generator/log"
 
 	"github.com/gosimple/slug"
+	"go.uber.org/zap"
 )
 
 const (
@@ -64,6 +66,8 @@ func (m *MemeManager) NewTemplate(name, comment string, fileHeader *multipart.Fi
 	if filename == "" {
 		filename = DefaultImageName
 	}
+
+	log.Info("/newtemplate Filename is", zap.String("filename", filename))
 
 	if err := sanitizeFileName(filename); err != nil {
 		return nil, err

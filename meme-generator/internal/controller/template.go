@@ -47,6 +47,8 @@ func CreateTemplate(s storage.Store, memeManager *meme.MemeManager) gin.HandlerF
 			return
 		}
 
+		log.Info("/createtemplate Filename is", zap.String("filename", file.Filename))
+
 		if strings.Contains(file.Filename, ";") {
 			c.JSON(http.StatusBadRequest, gin.H{"error": errInvalidFileName.Error()})
 			return
