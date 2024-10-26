@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"meme-generator/internal/auth"
 	"meme-generator/internal/meme"
@@ -25,6 +26,7 @@ var (
 	errCheckFileType     = errors.New("failed to check file type")
 	errInvalidFileType   = errors.New("invalid file type: only jpeg, jpg and png are allowed")
 	errTemplateInfo      = errors.New("failed to get template private info")
+	errInvalidFileName   = errors.New("invalid file name: contains ';' character")
 )
 
 type TemplateRequest struct {
@@ -42,6 +44,11 @@ func CreateTemplate(s storage.Store, memeManager *meme.MemeManager) gin.HandlerF
 		}
 		if file.Size == 0 {
 			c.JSON(http.StatusBadRequest, gin.H{"error": errEmptyFile.Error()})
+			return
+		}
+
+		if strings.Contains(file.Filename, ";") {
+			c.JSON(http.StatusBadRequest, gin.H{"error": errInvalidFileName.Error()})
 			return
 		}
 

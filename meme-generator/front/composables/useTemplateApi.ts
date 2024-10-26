@@ -19,6 +19,10 @@ export function useTemplateApi() {
   }
 
   const createTemplate = async (input: CreateTemplateDto, file: File) => {
+    if (file.name.includes(';')) {
+      throw new Error("Invalid file name: contains ';' character")
+    }
+
     const formData = new FormData()
     formData.append('image', file)
     formData.append('name', input.name)

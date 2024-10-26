@@ -1,0 +1,15 @@
+app:
+    data_dir: ./data
+    debug: false
+database:
+    host: db
+    log_mode: false
+    name: memes
+    password: memes
+    port: 5432
+    ssl_mode: disable
+    username: memes
+web:
+    port: 8080
+    secret_key: secret
+    static: ./static
