@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"meme-generator/internal/model"
 	"meme-generator/internal/utils"
@@ -20,6 +21,13 @@ const (
 	templatesDir     = "templates"
 	templateInfoFile = "info.txt"
 )
+
+func sanitizeFileName(fileName string) error {
+	if strings.Contains(fileName, ";") {
+		return fmt.Errorf("invalid file name: contains ';' character")
+	}
+	return nil
+}
 
 func (m *MemeManager) NewTemplate(name, comment string, fileHeader *multipart.FileHeader, userID uint) (*model.Template, error) {
 	// Prepare template struct
@@ -55,6 +63,10 @@ func (m *MemeManager) NewTemplate(name, comment string, fileHeader *multipart.Fi
 	filename := fileHeader.Filename
 	if filename == "" {
 		filename = DefaultImageName
+	}
+
+	if err := sanitizeFileName(filename); err != nil {
+		return nil, err
 	}
 
 	template.FileName = filename
