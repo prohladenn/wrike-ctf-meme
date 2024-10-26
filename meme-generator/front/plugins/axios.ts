@@ -10,6 +10,20 @@ export default defineNuxtPlugin((nuxtApp) => {
     withCredentials: true, // For session cookie auth
   })
 
+  // Add a request interceptor for CSRF protection
+  api.interceptors.request.use(
+    (config) => {
+      const csrfToken = document.cookie.split('; ').find(row => row.startsWith('csrfToken='));
+      if (csrfToken) {
+        config.headers['X-CSRF-Token'] = csrfToken.split('=')[1];
+      }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+
   // Add a response interceptor
   api.interceptors.response.use(
     (response) => {
